@@ -59,15 +59,31 @@ struct task {
 };
 
 /* String to be written to nvme and read back to stdout */
-static const char str[] = "Hello World!";
+static const char str[] = "Hello World! Make this sentence so much longer to test this thread indeed goes first than the other thread.";
 static const char str_back[] = "Bye World!";
+
+/* Initialze pthread sync variables for correct printing order */
+static pthread_mutex_t mutex1 = PTHREAD_MUTEX_INITIALIZER;
+static pthread_cond_t cond1 = PTHREAD_COND_INITIALIZER;
+static bool has_said_hello = false;
 
 /* Callback function on read complete */
 static void read_complete(void *cb_ctx, const struct spdk_nvme_cpl *cpl_ctx) {
     struct task *iotask = cb_ctx;
 
     /* Print the content of the read buffer to stdout */
-    printf("%s", iotask->buffer);
+    pthread_mutex_lock(&mutex1);
+    if (!strcmp(iotask->buffer, str)) {
+        has_said_hello = true;
+    }
+    pthread_cond_signal(&cond1);
+    pthread_mutex_unlock(&mutex1);
+    pthread_mutex_lock(&mutex1);
+    while (!has_said_hello) {
+        pthread_cond_wait(&cond1, &mutex1);
+    }
+    printf("%s\n", iotask->buffer);
+    pthread_mutex_unlock(&mutex1);
 
     /* Free the memory allocated for the read buffer */
     if (iotask->is_on_cmb) {
