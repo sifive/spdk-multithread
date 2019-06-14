@@ -31,14 +31,16 @@
 #  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
-SPDK_ROOT_DIR := $(abspath $(CURDIR)/../../..)
-include $(SPDK_ROOT_DIR)/mk/spdk.common.mk
+SPDK_ROOT_DIR := $(abspath $(CURDIR)/../../../..)
 
-DIRS-y += hello_world_2_pthreads hello_world_event
+APP = hello_world_event
 
-.PHONY: all clean $(DIRS-y)
+include $(SPDK_ROOT_DIR)/mk/nvme.libtest.mk
+include $(SPDK_ROOT_DIR)/mk/spdk.modules.mk
 
-all: $(DIRS-y)
-clean: $(DIRS-y)
+SPDK_LIB_LIST = $(ALL_MODULES_LIST)
+SPDK_LIB_LIST += event_bdev event_copy
+SPDK_LIB_LIST += bdev copy event thread util conf trace \
+		log jsonrpc json rpc sock notify
 
-include $(SPDK_ROOT_DIR)/mk/spdk.subdirs.mk
+
