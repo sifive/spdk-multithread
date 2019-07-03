@@ -34,7 +34,7 @@
 SPDK_ROOT_DIR := $(abspath $(CURDIR)/../../..)
 include $(SPDK_ROOT_DIR)/mk/spdk.common.mk
 
-DIRS-y += hello_world_2_pthreads hello_world_event
+DIRS-y += two_pthreads event_framework 
 
 .PHONY: all clean $(DIRS-y)
 
